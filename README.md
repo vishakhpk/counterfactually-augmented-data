@@ -6,6 +6,13 @@ Added base LSTM Model
 Added extra preprocessing step to convert the labels to 1/0
 Model seems to learn a non-trivial classification but it's not great on 10 epochs. Right now only using the data in combined csv i.e. 3400 rows 
 
+## Update 12/9
+Parametrized a bunch of stuff
+To run:
+```
+python3 logit-pairing.py --epochs 20 --lambda 0.0005 --lr 0.0005 --output_path .
+```
+
 # Learning the Difference that Makes a Difference with Counterfactually-Augmented Data
 
 ### Overview

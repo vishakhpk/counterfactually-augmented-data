@@ -5,10 +5,10 @@ from torchtext.data import Field, RawField, TabularDataset, BucketIterator
 
 class LSTM(nn.Module):
 
-    def __init__(self, dimension=128):
+    def __init__(self, dimension=128, vocab_size = 2000):
         super(LSTM, self).__init__()
-
-        self.embedding = nn.Embedding(10854, 300)#len(text_field.vocab), 300)
+        print("Vocabulary size of lstm ", vocab_size)
+        self.embedding = nn.Embedding(vocab_size, 300)#len(text_field.vocab), 300)
         self.dimension = dimension
         self.lstm = nn.LSTM(input_size=300,
                             hidden_size=dimension,
