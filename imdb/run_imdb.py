@@ -26,7 +26,7 @@ parser.add_argument('--lr', type=float, default = 0.0005, help='Learning rate')
 parser.add_argument('--batch_size', type=int, default = 32, help='Batch size')
 parser.add_argument('--vocab_size', type=int, default = 3000,
                     help='Vocab size for lstm')
-parser.add_argument('--output_path', type=str, default = ".",
+parser.add_argument('--output_path', type=str, default = "./models",
                     help='Output path')
 parser.add_argument('--augment', type=bool, default = True,
                     help='Whether or not to cf-augment the train/val sets')
@@ -40,13 +40,16 @@ VOCAB_SIZE = args.vocab_size
 BSZ = args.batch_size
 AUGMENTED = args.augment
 
+model_name = f'epochs={EPOCHS},lambda={LAMBDA},lr={LR},vocab={VOCAB_SIZE},' \
+             f'bsz={BSZ},aug={AUGMENTED}'
+
 random.seed(123)
 np.random.seed(123)
 torch.manual_seed(123)
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-print(f'args: {args}')
+print(f'params: {model_name}')
 
 
 # load data ------------------------------------------------------------------ #
@@ -231,13 +234,14 @@ def train(model,
                 # checkpoint
                 if best_valid_loss > average_valid_loss:
                     best_valid_loss = average_valid_loss
-                    save_checkpoint(file_path + '/cf-model.pt', model,
-                                    optimizer, best_valid_loss)
-                    save_metrics(file_path + '/cf-metrics.pt', train_loss_list,
-                                 valid_loss_list, global_steps_list)
+                    save_checkpoint(file_path + f'/model-{model_name}.pt',
+                                    model, optimizer, best_valid_loss)
+                    save_metrics(file_path + f'/metrics-{model_name}.pt',
+                                 train_loss_list, valid_loss_list,
+                                 global_steps_list)
 
-    save_metrics(file_path + '/cf-metrics.pt', train_loss_list, valid_loss_list,
-                 global_steps_list)
+    save_metrics(file_path + f'/metrics-{model_name}.pt', train_loss_list,
+                 valid_loss_list, global_steps_list)
     print('Finished Training!')
 
 model = LSTM(vocab_size = VOCAB_SIZE).to(device)
@@ -245,7 +249,7 @@ optimizer = optim.Adam(model.parameters(), lr = LR)
 
 train(model=model, optimizer=optimizer, num_epochs = EPOCHS)
 train_loss_list, valid_loss_list, global_steps_list = load_metrics(
-    destination_folder + '/cf-metrics.pt')
+    destination_folder + f'/metrics-{model_name}.pt')
 
 # Evaluation Function
 def evaluate(model, test_loader, version='title', threshold=0.5):
@@ -308,5 +312,6 @@ def evaluate(model, test_loader, version='title', threshold=0.5):
 best_model = LSTM(vocab_size=VOCAB_SIZE).to(device)
 optimizer = optim.Adam(best_model.parameters(), lr=LR)
 
-load_checkpoint(destination_folder + '/cf-model.pt', best_model, optimizer)
+load_checkpoint(destination_folder + f'/model-{model_name}.pt', best_model,
+                optimizer)
 evaluate(best_model, cf_test_loader)
