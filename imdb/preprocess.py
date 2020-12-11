@@ -112,10 +112,10 @@ fact_full_imdb_val.to_csv(new_path + 'fact_full_imdb_val.csv', index=False)
 # add train/val cf samples to the dataset for use during training
 # add cf labels as 1 - original label
 X_train_aug = X_train.append(train_df['cf-text'])
-y_train_aug = y_train.append(1 - train_df['label'])
+y_train_aug = y_train.append(train_df['cf-label'])
 
 X_val_aug = X_val.append(val_df['cf-text'])
-y_val_aug = y_val.append(1 - val_df['label'])
+y_val_aug = y_val.append(val_df['cf-label'])
 
 # save augmented large dataset
 aug_full_imdb_train = pd.DataFrame({
