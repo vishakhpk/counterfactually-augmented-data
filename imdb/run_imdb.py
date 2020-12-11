@@ -31,7 +31,7 @@ parser.add_argument('--output_path', type=str, default = "models",
 parser.add_argument('--aug', type=int, default=1,
                     help='Whether or not to cf-augment the train/val sets (0 or 1)')
 parser.add_argument('--prepath', type=str, default=None,
-                    help='Path to pretrained model for warm starting')
+                    help='Relative path *within models/* to pretrained model for warm starting')
 args = parser.parse_args()
 
 EPOCHS = args.epochs
@@ -259,7 +259,7 @@ optimizer = optim.Adam(model.parameters(), lr = LR)
 
 if PRETRAIN_PATH is not None:
     print(f'Loading pretrained model:\n\t{PRETRAIN_PATH}')
-    load_checkpoint(PRETRAIN_PATH, model, optimizer)
+    load_checkpoint('models/' + PRETRAIN_PATH, model, optimizer)
 
 train(model=model, optimizer=optimizer, num_epochs = EPOCHS)
 train_loss_list, valid_loss_list, global_steps_list = load_metrics(
