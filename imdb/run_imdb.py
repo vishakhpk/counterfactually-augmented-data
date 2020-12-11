@@ -328,7 +328,7 @@ def evaluate(model, test_loader, version='title', threshold=0.5):
         'y_raw_cfact': y_raw_cfact,
     })
 
-    results_df.to_csv(f'results/{model_name}.csv')
+    results_df.to_csv(f'results/{model_name}.csv', index=False)
 
 best_model = LSTM(vocab_size=VOCAB_SIZE).to(device)
 optimizer = optim.Adam(best_model.parameters(), lr=LR)
