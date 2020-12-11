@@ -13,9 +13,9 @@ from keras.preprocessing.sequence import pad_sequences
 from sklearn.metrics import (accuracy_score, classification_report,
                              confusion_matrix)
 
-from simple_lstm import LSTM
-from simple_lstm import (save_metrics, load_metrics, save_checkpoint,
-                         load_checkpoint)
+from ..simple_lstm import LSTM
+from ..simple_lstm import (save_metrics, load_metrics, save_checkpoint,
+                           load_checkpoint)
 
 
 parser = argparse.ArgumentParser(description='Process some integers.')
