@@ -48,26 +48,23 @@ print(f'params: {params}')
 model_name = f'imdb-pretrain-aug={AUGMENTED}'
 
 # load full dataset
-df = pd.read_csv('data/imdb_full.csv')
-X_all, y_all = df.Text, df.Sentiment
-y_all = (y_all == 'Positive').astype(int)
-
 if AUGMENTED:
-    # add train/val cf samples to the dataset for use during training
-    extra_train = pd.read_csv('data/fact_train.csv')
-    extra_val = pd.read_csv('data/fact_val.csv')
-    X_all = X_all.append(extra_train['cf-text']).append(extra_val['cf-text'])
-    y_all = y_all.append(extra_train['label']).append(extra_val['label'])
+    path = 'data/aug_full_imdb_{}.csv'
+else:
+    path = 'data/fact_full_imdb_{}.csv'
 
-y_all = y_all.tolist()
-X_all = X_all.tolist()
+train_df = pd.read_csv(path.format('train'))
+X_train = train_df['text'].tolist()
+y_train = train_df['label'].tolist()
 
-# split into train, val, test
-X_trainval, X_test, y_trainval, y_test = train_test_split(
-    X_all, y_all, test_size=0.2, random_state=123, shuffle=True)
+val_df = pd.read_csv(path.format('val'))
+X_val = val_df['text'].tolist()
+y_val = val_df['label'].tolist()
 
-X_train, X_val, y_train, y_val = train_test_split(
-    X_trainval, y_trainval, test_size=0.2, random_state=123, shuffle=True)
+# always use the same augmented test set
+test_df = pd.read_csv('data/aug_test.csv')
+X_test = test_df['text'].tolist()
+y_test = test_df['label'].tolist()
 
 print('Dataset size:')
 print(f'{len(y_train)} train, {len(y_val)} val, {len(y_test)} test')
