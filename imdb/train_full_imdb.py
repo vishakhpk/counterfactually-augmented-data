@@ -19,7 +19,7 @@ from simple_lstm import (save_metrics, load_metrics, save_checkpoint,
 
 
 parser = argparse.ArgumentParser(description='Process some integers.')
-parser.add_argument('--epochs', type=int, default = 20, help='Num Epochs')
+parser.add_argument('--epochs', type=int, default = 10, help='Num Epochs')
 parser.add_argument('--lr', type=float, default = 0.0005, help='Learning rate')
 parser.add_argument('--batch_size', type=int, default = 32, help='Batch size')
 parser.add_argument('--vocab_size', type=int, default = 3000,
