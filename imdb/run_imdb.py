@@ -56,9 +56,9 @@ def load_imdb(split, augmented, random_state=123):
 
     # load requested csv
     if augmented:
-        path = 'sentiment/aug_{}.csv'
+        path = 'data/aug_{}.csv'
     else:
-        path = 'sentiment/fact_{}.csv'
+        path = 'data/fact_{}.csv'
     df = pd.read_csv(path.format(split))
 
     # shuffle the data
