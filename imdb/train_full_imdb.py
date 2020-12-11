@@ -127,6 +127,7 @@ def get_cf_dataloader(data, cf_data, labels, batch_size):
 
         batches.append((text_tensor, length_tensor, cf_text_tensor,
                         cf_length_tensor, labels_tensor))
+    return batches
 
 
 train_loader = get_dataloader(train_sequences, y_train, BSZ)
