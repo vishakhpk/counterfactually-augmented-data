@@ -316,7 +316,7 @@ def evaluate(model, test_loader, version='title', threshold=0.5):
     # for batch_a, batch_b in zip(y_fact_out, y_cfact_out):
     #     batch_diff = (batch_a - batch_b).abs().tolist()
     #     differences.extend(batch_diff)
-    mean_difference = np.abs(np.subtract(y_raw_fact - y_raw_cfact)).mean()
+    mean_difference = np.abs(np.subtract(y_raw_fact, y_raw_cfact)).mean()
     print(f'CF Gap: {mean_difference}')
 
     # save output
