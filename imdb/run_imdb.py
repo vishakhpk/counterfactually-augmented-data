@@ -30,6 +30,8 @@ parser.add_argument('--output_path', type=str, default = "./models",
                     help='Output path')
 parser.add_argument('--aug', type=int, default=1,
                     help='Whether or not to cf-augment the train/val sets (0 or 1)')
+parser.add_argument('--prepath', type=str, default=None,
+                    help='Path to pretrained model for warm starting')
 args = parser.parse_args()
 
 EPOCHS = args.epochs
@@ -39,6 +41,7 @@ OUT_DIR = args.output_path
 VOCAB_SIZE = args.vocab_size
 BSZ = args.batch_size
 AUGMENTED = args.aug
+PRETRAIN_PATH = args.prepath
 
 model_name = f'epochs={EPOCHS},lambda={LAMBDA},lr={LR},vocab={VOCAB_SIZE},' \
              f'bsz={BSZ},aug={AUGMENTED}'
@@ -249,6 +252,9 @@ def train(model,
 
 model = LSTM(vocab_size = VOCAB_SIZE).to(device)
 optimizer = optim.Adam(model.parameters(), lr = LR)
+
+if PRETRAIN_PATH is not None:
+    load_checkpoint(PRETRAIN_PATH, model, optimizer)
 
 train(model=model, optimizer=optimizer, num_epochs = EPOCHS)
 train_loss_list, valid_loss_list, global_steps_list = load_metrics(
