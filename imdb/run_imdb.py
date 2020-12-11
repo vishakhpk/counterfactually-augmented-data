@@ -263,61 +263,72 @@ train_loss_list, valid_loss_list, global_steps_list = load_metrics(
 
 # Evaluation Function
 def evaluate(model, test_loader, version='title', threshold=0.5):
-    y_pred = []
-    y_true = []
+    y_true_fact = []
 
-    y_fact = []
-    y_cfact = []
-    y_fact_out = []
-    y_cfact_out = []
+    y_pred_fact = []
+    y_pred_cfact = []
+
+    y_raw_fact = []
+    y_raw_cfact = []
 
     model.eval()
     with torch.no_grad():
         for text, text_len, cf_text, cf_text_len, labels in test_loader:
             # labels
             labels = labels.to(device)
-            y_true.extend(labels.tolist())
+            y_true_fact.extend(labels.tolist())
 
             # factual predictions
             text = text.to(device)
             output = model(text, text_len)
 
             sigmoid_out = torch.sigmoid(output)
-            y_fact_out.append(sigmoid_out)
+            y_raw_fact.extend(sigmoid_out.tolist())
 
             output = (sigmoid_out > threshold).int()
-
-            y_pred.extend(output.tolist())
-            y_fact.extend(output.tolist())
+            y_pred_fact.extend(output.tolist())
 
             # cf predictions
             cf_text = cf_text.to(device)
             cf_output = model(cf_text, cf_text_len)
 
             cf_sigmoid_out = torch.sigmoid(cf_output)
-            y_cfact_out.append(cf_sigmoid_out)
+            y_raw_cfact.extend(cf_sigmoid_out.tolist())
 
             cf_output = (cf_sigmoid_out > threshold).int()
-            y_cfact.extend(cf_output.tolist())
+            y_pred_cfact.extend(cf_output.tolist())
 
 
     print('Classification Report:')
-    print(classification_report(y_true, y_pred, labels=[1, 0], digits=4))
+    print(classification_report(y_true_fact, y_pred_fact, labels=[1, 0],
+                                digits=4))
 
     # CF Consistency:
     # fraction of cf pairs that receive different predictions
     # 1 indicates consistency, 0 indicates lack of consistency
     # note all pairs are asymmetric
-    print(f'CF Consistency: {np.not_equal(y_fact, y_cfact).mean()}')
+    print(f'CF Consistency: {np.not_equal(y_pred_fact, y_pred_cfact).mean()}')
 
     # CF Gap:
     # mean absolute difference in prediction
     # larger is better
-    differences = []
-    for batch_a, batch_b in zip(y_fact_out, y_cfact_out):
-        batch_diff = (batch_a - batch_b).abs().tolist()
-        differences.extend(batch_diff)
-    print(f'CF Gap: {np.mean(differences)}')
+    # differences = []
+    # for batch_a, batch_b in zip(y_fact_out, y_cfact_out):
+    #     batch_diff = (batch_a - batch_b).abs().tolist()
+    #     differences.extend(batch_diff)
+    mean_difference = (y_raw_fact - y_raw_cfact).abs().mean()
+    print(f'CF Gap: {mean_difference}')
+
+    # save output
+    results_df = pd.DataFrame({
+        'y_true_fact': y_true_fact,
+        'y_pred_fact': y_pred_fact,
+        'y_pred_cfact': y_pred_cfact,
+        'y_raw_fact': y_raw_fact,
+        'y_raw_cfact': y_raw_cfact,
+    })
+
+    results_df.to_csv(f'results/{model_name}.csv')
 
 best_model = LSTM(vocab_size=VOCAB_SIZE).to(device)
 optimizer = optim.Adam(best_model.parameters(), lr=LR)
