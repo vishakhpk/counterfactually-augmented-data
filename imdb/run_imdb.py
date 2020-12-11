@@ -26,7 +26,7 @@ parser.add_argument('--lr', type=float, default = 0.0005, help='Learning rate')
 parser.add_argument('--batch_size', type=int, default = 32, help='Batch size')
 parser.add_argument('--vocab_size', type=int, default = 3000,
                     help='Vocab size for lstm')
-parser.add_argument('--output_path', type=str, default = "./models",
+parser.add_argument('--output_path', type=str, default = "models",
                     help='Output path')
 parser.add_argument('--aug', type=int, default=1,
                     help='Whether or not to cf-augment the train/val sets (0 or 1)')
