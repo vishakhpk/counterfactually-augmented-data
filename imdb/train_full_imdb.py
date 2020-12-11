@@ -63,11 +63,10 @@ y_val = val_df['label'].tolist()
 
 # always use the same augmented test set
 test_df = pd.read_csv('data/aug_test.csv')
-X_test = test_df['text'].tolist()
 y_test = test_df['label'].tolist()
 
 print('Dataset size:')
-print(f'{len(y_train)} train, {len(y_val)} val, {len(y_test)} test')
+print(f'{len(y_train)} train, {len(y_val)} val, {len(test_df)} test')
 
 
 # setup tokenizer
@@ -82,9 +81,20 @@ def get_padded_sequences(text):
     data = pad_sequences(sequences, maxlen=padding, padding='post')
     return data
 
+
+def get_cf_padded_sequences(df):
+    sequences = tokenizer.texts_to_sequences(df['text'])
+    cf_sequences = tokenizer.texts_to_sequences(df['cf-text'])
+    padding = max([len(i) for i in sequences] +
+                  [len(j) for j in cf_sequences])
+    data = pad_sequences(sequences, maxlen=padding, padding='post')
+    cf_data = pad_sequences(cf_sequences, maxlen=padding, padding='post')
+
+    return data, cf_data
+
 train_sequences = get_padded_sequences(X_train)
 val_sequences = get_padded_sequences(X_val)
-test_sequences = get_padded_sequences(X_test)
+test_sequences, cf_test_sequences = get_cf_padded_sequences(test_df)
 
 
 def get_dataloader(data, labels, batch_size):
@@ -100,10 +110,28 @@ def get_dataloader(data, labels, batch_size):
     return batches
 
 
+def get_cf_dataloader(data, cf_data, labels, batch_size):
+    batches = []
+    for i in range(0, len(data), batch_size):
+        text_tensor = torch.tensor(
+            data[i:i + batch_size], device=device, dtype=torch.long)
+        length_tensor = torch.tensor(
+            [len(j) for j in data[i:i+batch_size]], device=device)
+        labels_tensor = torch.tensor(
+            labels[i:i + batch_size], device=device, dtype=torch.float)
+
+        cf_text_tensor = torch.tensor(
+            cf_data[i:i + batch_size], device=device, dtype=torch.long)
+        cf_length_tensor = torch.tensor(
+            [len(j) for j in cf_data[i:i+batch_size]], device=device)
+
+        batches.append((text_tensor, length_tensor, cf_text_tensor,
+                        cf_length_tensor, labels_tensor))
+
+
 train_loader = get_dataloader(train_sequences, y_train, BSZ)
 val_loader = get_dataloader(val_sequences, y_val, BSZ)
-test_loader = get_dataloader(test_sequences, y_test, BSZ)
-
+test_loader = get_cf_dataloader(test_sequences, cf_test_sequences, y_test, BSZ)
 
 # train and test ------------------------------------------------------------- #
 destination_folder = OUT_DIR
@@ -196,28 +224,72 @@ def train(model,
 
 # Evaluation Function
 def evaluate(model, test_loader, version='title', threshold=0.5):
-    y_pred = []
-    y_true = []
+    y_true_fact = []
+
+    y_pred_fact = []
+    y_pred_cfact = []
+
+    y_raw_fact = []
+    y_raw_cfact = []
 
     model.eval()
     with torch.no_grad():
-        for text, text_len, labels in test_loader:
+        for text, text_len, cf_text, cf_text_len, labels in test_loader:
             # labels
             labels = labels.to(device)
-            y_true.extend(labels.tolist())
+            y_true_fact.extend(labels.tolist())
 
             # factual predictions
             text = text.to(device)
             output = model(text, text_len)
 
             sigmoid_out = torch.sigmoid(output)
-            output = (sigmoid_out > threshold).int()
+            y_raw_fact.extend(sigmoid_out.tolist())
 
-            y_pred.extend(output.tolist())
+            output = (sigmoid_out > threshold).int()
+            y_pred_fact.extend(output.tolist())
+
+            # cf predictions
+            cf_text = cf_text.to(device)
+            cf_output = model(cf_text, cf_text_len)
+
+            cf_sigmoid_out = torch.sigmoid(cf_output)
+            y_raw_cfact.extend(cf_sigmoid_out.tolist())
+
+            cf_output = (cf_sigmoid_out > threshold).int()
+            y_pred_cfact.extend(cf_output.tolist())
 
 
     print('Classification Report:')
-    print(classification_report(y_true, y_pred, labels=[1, 0], digits=4))
+    print(classification_report(y_true_fact, y_pred_fact, labels=[1, 0],
+                                digits=4))
+
+    # CF Consistency:
+    # fraction of cf pairs that receive different predictions
+    # 1 indicates consistency, 0 indicates lack of consistency
+    # note all pairs are asymmetric
+    print(f'CF Consistency: {np.not_equal(y_pred_fact, y_pred_cfact).mean()}')
+
+    # CF Gap:
+    # mean absolute difference in prediction
+    # larger is better
+    # differences = []
+    # for batch_a, batch_b in zip(y_fact_out, y_cfact_out):
+    #     batch_diff = (batch_a - batch_b).abs().tolist()
+    #     differences.extend(batch_diff)
+    mean_difference = np.abs(np.subtract(y_raw_fact, y_raw_cfact)).mean()
+    print(f'CF Gap: {mean_difference}')
+
+    # save output
+    results_df = pd.DataFrame({
+        'y_true_fact': y_true_fact,
+        'y_pred_fact': y_pred_fact,
+        'y_pred_cfact': y_pred_cfact,
+        'y_raw_fact': y_raw_fact,
+        'y_raw_cfact': y_raw_cfact,
+    })
+
+    results_df.to_csv(f'results/{model_name}.csv', index=False)
 
 
 model = LSTM(vocab_size = VOCAB_SIZE).to(device)
