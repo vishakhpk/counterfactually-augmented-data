@@ -28,8 +28,8 @@ parser.add_argument('--vocab_size', type=int, default = 3000,
                     help='Vocab size for lstm')
 parser.add_argument('--output_path', type=str, default = "./models",
                     help='Output path')
-parser.add_argument('--augment', type=bool, default = True,
-                    help='Whether or not to cf-augment the train/val sets')
+parser.add_argument('--aug', type=int, default=1,
+                    help='Whether or not to cf-augment the train/val sets (0 or 1)')
 args = parser.parse_args()
 
 EPOCHS = args.epochs
@@ -72,6 +72,9 @@ def load_imdb(split, augmented, random_state=123):
 train_df = load_imdb(split='train', augmented=AUGMENTED)
 val_df = load_imdb(split='val', augmented=AUGMENTED)
 test_df = load_imdb(split='test', augmented=True)  # test data always augmented
+
+print('Dataset size:')
+print(f'{len(train_df)} train, {len(val_df)} val, {len(test_df)} test')
 
 # format for lstm ------------------------------------------------------------ #
 # build vocabulary/tokenizer from training data
