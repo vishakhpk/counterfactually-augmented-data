@@ -1,4 +1,4 @@
-import os
+import random
 import argparse
 
 import torch
@@ -57,7 +57,7 @@ model_name = 'imdb-pretrain'
 # load full dataset
 df = pd.read_csv('data/imdb_full.csv')
 X_all, y_all = df.Text, df.Sentiment
-y_all = (y_all == 'Positive').astype(int)
+y_all = (y_all == 'Positive').astype(int).tolist()
 
 # split into train, val, test
 X_trainval, X_test, y_trainval, y_test = train_test_split(
@@ -72,7 +72,7 @@ print(f'{len(y_train)} train, {len(y_val)} val, {len(y_test)} test')
 
 # setup tokenizer
 tokenizer = Tokenizer(num_words=VOCAB_SIZE, oov_token=True)
-tokenizer.fit_on_texts(vocab_texts)
+tokenizer.fit_on_texts(X_train)
 
 # tokenize, convert to sequences, and pad
 # note: using the same padding for factual/counterfactual data
@@ -82,9 +82,9 @@ def get_padded_sequences(text):
     data = pad_sequences(sequences, maxlen=padding, padding='post')
     return data
 
-train_sequences = get_padded_sequences(X_train)
-val_sequences = get_padded_sequences(X_val)
-test_sequences = get_padded_sequences(X_test)
+train_sequences = get_padded_sequences(X_train.tolist())
+val_sequences = get_padded_sequences(X_val.tolist())
+test_sequences = get_padded_sequences(X_test.tolist())
 
 
 def get_dataloader(data, labels, batch_size):
