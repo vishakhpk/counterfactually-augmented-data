@@ -138,7 +138,7 @@ def train(model,
             text = text.to(device)
 
             output = model(text, text_len)
-
+            output = torch.sigmoid(output)
             loss = criterion(output, labels)
 
             optimizer.zero_grad()
