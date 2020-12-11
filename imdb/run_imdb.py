@@ -254,6 +254,7 @@ model = LSTM(vocab_size = VOCAB_SIZE).to(device)
 optimizer = optim.Adam(model.parameters(), lr = LR)
 
 if PRETRAIN_PATH is not None:
+    print(f'Loading pretrained model:\n\t{PRETRAIN_PATH}')
     load_checkpoint(PRETRAIN_PATH, model, optimizer)
 
 train(model=model, optimizer=optimizer, num_epochs = EPOCHS)
