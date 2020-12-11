@@ -100,7 +100,6 @@ test_loader = get_dataloader(test_sequences, y_test, BSZ)
 
 # train and test ------------------------------------------------------------- #
 destination_folder = OUT_DIR
-lambda_coef = LAMBDA
 criterion = torch.nn.BCELoss()
 
 def train(model,
