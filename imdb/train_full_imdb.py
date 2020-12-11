@@ -19,15 +19,15 @@ from simple_lstm import (save_metrics, load_metrics, save_checkpoint,
 
 
 parser = argparse.ArgumentParser(description='Process some integers.')
-parser.add_argument('--epochs', type=int, default = 10, help='Num Epochs')
+parser.add_argument('--epochs', type=int, default = 5, help='Num Epochs')
 parser.add_argument('--lr', type=float, default = 0.0005, help='Learning rate')
-parser.add_argument('--batch_size', type=int, default = 32, help='Batch size')
+parser.add_argument('--batch_size', type=int, default = 64, help='Batch size')
 parser.add_argument('--vocab_size', type=int, default = 3000,
                     help='Vocab size for lstm')
 parser.add_argument('--output_path', type=str, default = "./models",
                     help='Output path')
-parser.add_argument('--prepath', type=str, default=None,
-                    help='Path to pretrained model for warm starting')
+parser.add_argument('--aug', type=int, default=1,
+                    help='Whether or not to cf-augment the train/val sets (0 or 1)')
 args = parser.parse_args()
 
 EPOCHS = args.epochs
@@ -35,7 +35,7 @@ LR = args.lr
 OUT_DIR = args.output_path
 VOCAB_SIZE = args.vocab_size
 BSZ = args.batch_size
-PRETRAIN_PATH = args.prepath
+AUGMENTED = args.aug
 
 random.seed(123)
 np.random.seed(123)
@@ -43,14 +43,24 @@ torch.manual_seed(123)
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-params = f'epochs={EPOCHS},lr={LR},vocab={VOCAB_SIZE},bsz={BSZ}'
+params = f'epochs={EPOCHS},lr={LR},vocab={VOCAB_SIZE},bsz={BSZ},aug={AUGMENTED}'
 print(f'params: {params}')
-model_name = 'imdb-pretrain'
+model_name = f'imdb-pretrain-aug={AUGMENTED}'
 
 # load full dataset
 df = pd.read_csv('data/imdb_full.csv')
 X_all, y_all = df.Text, df.Sentiment
-y_all = (y_all == 'Positive').astype(int).tolist()
+y_all = (y_all == 'Positive').astype(int)
+
+if AUGMENTED:
+    # add train/val cf samples to the dataset for use during training
+    extra_train = pd.read_csv('data/fact_train.csv')
+    extra_val = pd.read_csv('data/fact_val.csv')
+    X_all = X_all.append(extra_train['cf-text']).append(extra_val['cf-text'])
+    y_all = y_all.append(extra_train['label']).append(extra_val['label'])
+
+y_all = y_all.tolist()
+X_all = X_all.tolist()
 
 # split into train, val, test
 X_trainval, X_test, y_trainval, y_test = train_test_split(
@@ -75,9 +85,9 @@ def get_padded_sequences(text):
     data = pad_sequences(sequences, maxlen=padding, padding='post')
     return data
 
-train_sequences = get_padded_sequences(X_train.tolist())
-val_sequences = get_padded_sequences(X_val.tolist())
-test_sequences = get_padded_sequences(X_test.tolist())
+train_sequences = get_padded_sequences(X_train)
+val_sequences = get_padded_sequences(X_val)
+test_sequences = get_padded_sequences(X_test)
 
 
 def get_dataloader(data, labels, batch_size):
