@@ -38,7 +38,7 @@ LR = args.lr
 OUT_DIR = args.output_path
 VOCAB_SIZE = args.vocab_size
 BSZ = args.batch_size
-AUGMENTED = args.augment
+AUGMENTED = args.aug
 
 model_name = f'epochs={EPOCHS},lambda={LAMBDA},lr={LR},vocab={VOCAB_SIZE},' \
              f'bsz={BSZ},aug={AUGMENTED}'
