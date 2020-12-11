@@ -25,9 +25,25 @@ from simple_lstm import save_metrics, load_metrics, save_checkpoint, load_checkp
 
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 # # There are no repeated batch_id values --> we can use them as IDs
+import argparse
+parser = argparse.ArgumentParser(description='Process some integers.')
+parser.add_argument('--epochs', type=int, default = 20, help='Num Epochs')
+parser.add_argument('--lambda_coeff', type=float, default = 0.0005, help='Lambda value for logit pairing')
+parser.add_argument('--lr', type=float, default = 0.0005, help='Learning rate')
+parser.add_argument('--batch_size', type=int, default = 32, help='Batch size')
+parser.add_argument('--vocab_size', type=int, default = 3000, help='Vocab size for lstm')
+parser.add_argument('--output_path', type=str, default = ".", help='Output path')
+args = parser.parse_args()
 
-# In[3]:
+EPOCHS = args.epochs
+LAMBDA = args.lambda_coeff
+LR = args.lr
+OUT_DIR = args.output_path
+VOCAB_SIZE = args.vocab_size
+BSZ = args.batch_size
 
+print(args)
+#exit(0)
 
 path = 'sentiment/combined/paired/{}_paired.tsv'
 train_path = path.format('train')
@@ -66,7 +82,8 @@ text_field = Field(tokenize='spacy', lower=True, include_lengths=True, batch_fir
 text_field.build_vocab(all_train_texts, min_freq=3)
 
 # setup tokenizer
-tokenizer = Tokenizer(num_words=len(text_field.vocab), oov_token=True)
+vocab_size = VOCAB_SIZE
+tokenizer = Tokenizer(num_words=vocab_size, oov_token=True)
 tokenizer.fit_on_texts(all_train_texts)
 
 # split into factual and counterfactual
@@ -155,7 +172,7 @@ cf_test_data = pad_sequences(cf_test_sequences, maxlen=test_padding, padding='po
 # In[15]:
 
 
-batch_size = 32
+batch_size = BSZ
 use_cuda = torch.cuda.is_available()
 device = torch.device("cuda:0" if use_cuda else "cpu")
 
@@ -193,13 +210,16 @@ print(len(train_loader), len(val_loader), len(test_loader))
 
 # In[16]:
 
-destination_folder = "."
-lambda_coef = 0.01
+destination_folder = OUT_DIR#"."
+lambda_coef = LAMBDA#0.0005
 criterion = torch.nn.BCELoss()
 
 def clp_loss(criterion, output, labels, cf_output, lambda_coef):
     counterfactual_loss = (output - cf_output).abs().sum()
-    loss = criterion(output, labels) - lambda_coef * counterfactual_loss
+    sigmoid_out = torch.sigmoid(output)
+    #print("Loss function ", sigmoid_out)
+    loss = criterion(sigmoid_out, labels) - lambda_coef * counterfactual_loss
+    #loss = criterion(output, labels) - lambda_coef * counterfactual_loss
     return loss
 
 
@@ -288,7 +308,7 @@ def train(model,
                       #text_len = torch.ones((batch_size, ), dtype=torch.long, device=device) * val_padding
                       #titletext_len = titletext_len.to(device)
                       output = model(text, text_len)
-
+                      output = torch.sigmoid(output)
                       loss = criterion(output, labels)
                       valid_running_loss += loss.item()
                       #val_batches += 1
@@ -319,10 +339,10 @@ def train(model,
     print('Finished Training!')
 
 
-model = LSTM().to(device)
-optimizer = optim.Adam(model.parameters(), lr=0.0005)
+model = LSTM(vocab_size = VOCAB_SIZE).to(device)
+optimizer = optim.Adam(model.parameters(), lr = LR)#lr=0.0005)
 
-train(model=model, optimizer=optimizer, num_epochs=20)
+train(model=model, optimizer=optimizer, num_epochs = EPOCHS)#num_epochs=20)
 train_loss_list, valid_loss_list, global_steps_list = load_metrics(destination_folder + '/cf-metrics.pt')
 
 # Evaluation Function
@@ -343,16 +363,18 @@ def evaluate(model, test_loader, version='title', threshold=0.5):
             #text_len = torch.ones((batch_size, )) * test_padding
             #titletext_len = titletext_len.to(device)
             output = model(text, text_len)
-
-            output = (output > threshold).int()
+            
+            sigmoid_out = torch.sigmoid(output)
+            output = (sigmoid_out > threshold).int()
+            #output = (output > threshold).int()
             y_pred.extend(output.tolist())
             y_true.extend(labels.tolist())
     
     print('Classification Report:')
     print(classification_report(y_true, y_pred, labels=[1,0], digits=4))
     
-best_model = LSTM().to(device)
-optimizer = optim.Adam(best_model.parameters(), lr=0.001)
+best_model = LSTM(vocab_size=VOCAB_SIZE).to(device)
+optimizer = optim.Adam(best_model.parameters(), lr=LR)
 
 load_checkpoint(destination_folder + '/cf-model.pt', best_model, optimizer)
 evaluate(best_model, test_loader)
