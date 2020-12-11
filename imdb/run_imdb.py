@@ -56,7 +56,7 @@ print(f'params: {model_name}')
 
 if PRETRAIN_PATH is not None:
     print(f'Starting with pretrained model:\n\t{PRETRAIN_PATH}')
-    model_name += f'+{PRETRAIN_PATH[:-2]}'  # remove .pt
+    model_name += f'+{PRETRAIN_PATH[:-3]}'  # remove .pt
 
 
 # load data ------------------------------------------------------------------ #
