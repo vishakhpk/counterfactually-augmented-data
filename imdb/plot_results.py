@@ -50,7 +50,7 @@ ax.set_position([box.x0, box.y0 + box.height * 0.2,
                     box.width, box.height * 0.8])
 
 # Put a legend below current axis
-ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),
-          fancybox=True, shadow=True, ncol=5)
+ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.08),
+          fancybox=True, shadow=True, ncol=1)
 
 plt.show()
