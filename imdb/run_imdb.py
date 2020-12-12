@@ -228,8 +228,8 @@ def train(model,
                         output = torch.sigmoid(output)
 
                         # ugly but it works
-                        y_true_val.extend(labels.cpu().numpy().astype(float).tolist())
-                        y_pred_val.extend(output.cpu().numpy().astype(float).tolist())
+                        y_true_val.extend(labels.tolist())
+                        y_pred_val.extend((output > 0.5).tolist())
 
                         loss = criterion(output, labels)
                         valid_running_loss += loss.item()
