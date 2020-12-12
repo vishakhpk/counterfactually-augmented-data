@@ -29,18 +29,57 @@ def run_command(bash_command):
 
 
 def main():
-    params = {
-        'lambda_coeff': 0,
-        'epochs': 20,
-        'lr': 0.0005,
-        'batch_size': 32,
-        'aug': 0,
-        'vocab_size': 3000,
+    small_param_sets = {
+        'baseline_factual':  [
+            {'lambda_coeff': 0, 'aug': 0,  'epochs': 20, 'lr': 0.0005,
+             'batch_size': 32, 'vocab_size': 3000}
+        ],
+        'baseline_augmented':  [
+            {'lambda_coeff': 0, 'aug': 1,  'epochs': 20, 'lr': 0.0005,
+             'batch_size': 32, 'vocab_size': 3000}
+        ],
+        'clp': [
+            {'lambda_coeff': 0.0005, 'aug': 0,  'epochs': 20, 'lr': 0.0005,
+             'batch_size': 32, 'vocab_size': 3000}
+        ],
+        'clp_augmented':  [
+            {'lambda_coeff': 0.00001, 'aug': 1,  'epochs': 20, 'lr': 0.0005,
+             'batch_size': 32, 'vocab_size': 3000},
+            {'lambda_coeff': 0.0001, 'aug': 1,  'epochs': 20, 'lr': 0.0005,
+             'batch_size': 32, 'vocab_size': 3000},
+            {'lambda_coeff': 0.001, 'aug': 1,  'epochs': 20, 'lr': 0.0005,
+             'batch_size': 32, 'vocab_size': 3000},
+            {'lambda_coeff': 0.01, 'aug': 1,  'epochs': 20, 'lr': 0.0005,
+             'batch_size': 32, 'vocab_size': 3000},
+        ],
     }
+    pretrain_param_sets = {
+        'pretrain':  [
+            {'epochs': 20, 'lr': 0.0005, 'batch_size': 32, 'vocab_size': 3000}
+        ],
+    }
+    large_param_sets = {
+            'pretrain_baseline_factual':  [
+                {'lambda_coeff': 0, 'aug': 0,  'epochs': 20, 'lr': 0.0005,
+                 'batch_size': 32, 'vocab_size': 3000}
+            ],
+            'pretrain_baseline_augmented':  [
+                {'lambda_coeff': 0, 'aug': 1,  'epochs': 20, 'lr': 0.0005,
+                 'batch_size': 32, 'vocab_size': 3000}
+            ],
+            'pretrain_clp': [
+                {'lambda_coeff': 0.0005, 'aug': 0,  'epochs': 20,
+                 'lr': 0.0005, 'batch_size': 32, 'vocab_size': 3000}
+            ],
+            'pretrain_clp_augmented':  [
+                {'lambda_coeff': 0.0001, 'aug': 1,  'epochs': 20,
+                 'lr': 0.0005, 'batch_size': 32, 'vocab_size': 3000}
+            ],
+        }
 
-    command = large_regime(**params)
-
-    run_command(command)
+    for params in small_param_sets['clp_augmented']:
+        command = large_regime(**params)
+        run_command(command)
 
 
 if __name__ == '__main__':
