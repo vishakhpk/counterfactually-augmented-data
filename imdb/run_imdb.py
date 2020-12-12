@@ -160,7 +160,7 @@ lambda_coef = LAMBDA
 criterion = torch.nn.BCELoss()
 
 def clp_loss(criterion, output, labels, cf_output, lambda_coef):
-    denominator = 1 + output + cf_output
+    denominator = 1
     counterfactual_loss = (output - cf_output).div(denominator).abs().sum()
     sigmoid_out = torch.sigmoid(output)
     loss = criterion(sigmoid_out, labels) - lambda_coef * counterfactual_loss
