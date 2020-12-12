@@ -88,45 +88,16 @@ y_all = (y_all == 'Positive').astype(int)
 X_train, X_val, y_train, y_val = train_test_split(
     X_all, y_all, test_size=0.2, random_state=123, shuffle=True)
 
-# add extra train/val factual data not present in imdb_80percent_test
-# Note: none of them are already present
-X_train = X_train.append(train_df['text'])
-y_train = y_train.append(train_df['label'])
-
-X_val = X_val.append(val_df['text'])
-y_val = y_val.append(val_df['label'])
-
 # save factual-only large dataset
-fact_full_imdb_train = pd.DataFrame({
+full_imdb_train = pd.DataFrame({
     'text': X_train,
     'label': y_train
 })
-fact_full_imdb_val = pd.DataFrame({
+full_imdb_val = pd.DataFrame({
     'text': X_val,
     'label': y_val
 })
-fact_full_imdb_train.to_csv(new_path + 'fact_full_imdb_train.csv', index=False)
-fact_full_imdb_val.to_csv(new_path + 'fact_full_imdb_val.csv', index=False)
-
-# augment large dataset with cf samples
-# add train/val cf samples to the dataset for use during training
-# add cf labels as 1 - original label
-X_train_aug = X_train.append(train_df['cf-text'])
-y_train_aug = y_train.append(train_df['cf-label'])
-
-X_val_aug = X_val.append(val_df['cf-text'])
-y_val_aug = y_val.append(val_df['cf-label'])
-
-# save augmented large dataset
-aug_full_imdb_train = pd.DataFrame({
-    'text': X_train_aug,
-    'label': y_train_aug
-})
-aug_full_imdb_val = pd.DataFrame({
-    'text': X_val_aug,
-    'label': y_val_aug
-})
-aug_full_imdb_train.to_csv(new_path + 'aug_full_imdb_train.csv', index=False)
-aug_full_imdb_val.to_csv(new_path + 'aug_full_imdb_val.csv', index=False)
+full_imdb_train.to_csv(new_path + 'full_imdb_train.csv', index=False)
+full_imdb_val.to_csv(new_path + 'full_imdb_val.csv', index=False)
 
 print('Done.')
