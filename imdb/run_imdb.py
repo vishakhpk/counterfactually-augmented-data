@@ -236,8 +236,8 @@ def train(model,
 
                     epochs_vs_performance['epoch'].append(epoch)
                     epochs_vs_performance['step'].append(global_step)
-                    epochs_vs_performance['f1_score'].append(
-                        f1_score(y_true_val, y_pred_val))
+                    # epochs_vs_performance['f1_score'].append(
+                    #     f1_score(y_true_val, y_pred_val))
                     print(y_true_val[:10])
                     print(y_pred_val[:10])
 
