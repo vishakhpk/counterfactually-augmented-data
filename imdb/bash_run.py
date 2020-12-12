@@ -29,14 +29,16 @@ def run_command(bash_command):
 
 
 def main():
-    lambda_coeff = 0
-    epochs = 20
-    lr = 0.0005
-    batch_size = 32
-    aug = 0
-    vocab_size = 3000
+    params = {
+        'lambda_coeff': 0,
+        'epochs': 20,
+        'lr': 0.0005,
+        'batch_size': 32,
+        'aug': 0,
+        'vocab_size': 3000,
+    }
 
-    command = large_regime(lambda_coeff, epochs, lr, batch_size, aug, vocab_size)
+    command = large_regime(**params)
 
     run_command(command)
 
