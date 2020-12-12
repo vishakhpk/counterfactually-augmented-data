@@ -228,7 +228,7 @@ def train(model,
                         epochs_vs_performance['epoch'].append(epoch)
                         epochs_vs_performance['step'].append(global_step)
                         epochs_vs_performance['f1_score'].append(
-                            f1_score(labels, output))
+                            f1_score(labels.tolist(), output.tolist()))
 
                         loss = criterion(output, labels)
                         valid_running_loss += loss.item()
