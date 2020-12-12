@@ -18,7 +18,7 @@ def large_regime(lambda_coeff, epochs, lr, batch_size, aug, vocab_size):
     command = f'python run_imdb.py --lambda_coeff={lambda_coeff} ' \
               f'--epochs={epochs} --lr={lr} --batch_size={batch_size} ' \
               f'--aug={aug} --vocab_size={vocab_size} ' \
-              f"--prepath='imdb-pretrain.pt'"
+              f"--prepath='model-imdb-pretrain.pt'"
     return command
 
 
