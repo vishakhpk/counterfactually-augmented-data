@@ -229,7 +229,7 @@ def train(model,
 
                         # ugly but it works
                         y_true_val.extend(labels.tolist())
-                        y_pred_val.extend((output > 0.5).tolist())
+                        y_pred_val.extend((output > 0.5).int().tolist())
 
                         loss = criterion(output, labels)
                         valid_running_loss += loss.item()
