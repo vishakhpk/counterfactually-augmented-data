@@ -228,8 +228,8 @@ def train(model,
                         epochs_vs_performance['epoch'].append(epoch)
                         epochs_vs_performance['step'].append(global_step)
                         epochs_vs_performance['f1_score'].append(
-                            f1_score(labels.numpy().astype(int),
-                                     output.numpy().astype(int)))
+                            f1_score(labels.cpu().numpy().astype(int),
+                                     output.cpu().numpy().astype(int)))
 
                         loss = criterion(output, labels)
                         valid_running_loss += loss.item()
