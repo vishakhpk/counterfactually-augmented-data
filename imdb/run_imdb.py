@@ -238,6 +238,8 @@ def train(model,
                     epochs_vs_performance['step'].append(global_step)
                     epochs_vs_performance['f1_score'].append(
                         f1_score(y_true_val, y_pred_val))
+                    print(y_true[:10])
+                    print(y_pred[:10])
 
                 # evaluation
                 average_train_loss = running_loss / eval_every
