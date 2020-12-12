@@ -218,6 +218,8 @@ def train(model,
                 model.eval()
                 with torch.no_grad():
                     # validation loop
+                    y_pred_val = []
+                    y_true_val = []
                     for text, text_len, labels in valid_loader:
                         labels = labels.to(device)
                         text = text.to(device)
@@ -225,14 +227,16 @@ def train(model,
                         output = model(text, text_len)
                         output = torch.sigmoid(output)
 
-                        epochs_vs_performance['epoch'].append(epoch)
-                        epochs_vs_performance['step'].append(global_step)
-                        epochs_vs_performance['f1_score'].append(
-                            f1_score(labels.cpu().numpy().astype(int),
-                                     output.cpu().numpy().astype(int)))
+                        y_true_val.extend(labels.cpu().tolist())
+                        y_pred_val.extend(output.cpu().tolist())
 
                         loss = criterion(output, labels)
                         valid_running_loss += loss.item()
+
+                    epochs_vs_performance['epoch'].append(epoch)
+                    epochs_vs_performance['step'].append(global_step)
+                    epochs_vs_performance['f1_score'].append(
+                        f1_score(y_true_val, y_pred_val))
 
                 # evaluation
                 average_train_loss = running_loss / eval_every
