@@ -1,7 +1,7 @@
 import subprocess
 
 
-def pre_train(lambda_coeff, epochs, lr, batch_size, aug, vocab_size, aug_test):
+def pre_train(epochs, lr, batch_size, vocab_size, aug_test):
     command = f'python train_full_imdb.py --epochs={epochs} ' \
               f' --lr={lr} --batch_size={batch_size} --vocab_size={vocab_size} ' \
               f'--aug_test={aug_test}'
