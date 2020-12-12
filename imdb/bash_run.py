@@ -43,13 +43,15 @@ def main():
              'batch_size': 32, 'vocab_size': 3000}
         ],
         'clp_augmented':  [
-            {'lambda_coeff': 0.00001, 'aug': 1,  'epochs': 20, 'lr': 0.0005,
+            {'lambda_coeff': 0.000001, 'aug': 1,  'epochs': 30, 'lr': 0.0005,
              'batch_size': 32, 'vocab_size': 3000},
-            {'lambda_coeff': 0.0001, 'aug': 1,  'epochs': 20, 'lr': 0.0005,
+            {'lambda_coeff': 0.00001, 'aug': 1,  'epochs': 30, 'lr': 0.0005,
              'batch_size': 32, 'vocab_size': 3000},
-            {'lambda_coeff': 0.001, 'aug': 1,  'epochs': 20, 'lr': 0.0005,
+            {'lambda_coeff': 0.0001, 'aug': 1,  'epochs': 30, 'lr': 0.0005,
              'batch_size': 32, 'vocab_size': 3000},
-            {'lambda_coeff': 0.01, 'aug': 1,  'epochs': 20, 'lr': 0.0005,
+            {'lambda_coeff': 0.001, 'aug': 1,  'epochs': 30, 'lr': 0.0005,
+             'batch_size': 32, 'vocab_size': 3000},
+            {'lambda_coeff': 0.01, 'aug': 1,  'epochs': 30, 'lr': 0.0005,
              'batch_size': 32, 'vocab_size': 3000},
         ],
     }
@@ -78,7 +80,8 @@ def main():
         }
 
     for params in small_param_sets['clp_augmented']:
-        command = small_regime(**params)
+        # command = small_regime(**params)
+        command = large_regime(**params)
         run_command(command)
 
 
