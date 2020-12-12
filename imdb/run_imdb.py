@@ -229,15 +229,15 @@ def train(model,
 
                         # ugly but it works
                         y_true_val.extend(labels.tolist())
-                        y_pred_val.extend((output > 0.5).int().tolist())
+                        y_pred_val.extend((output > 0.5).float().tolist())
 
                         loss = criterion(output, labels)
                         valid_running_loss += loss.item()
 
                     epochs_vs_performance['epoch'].append(epoch)
                     epochs_vs_performance['step'].append(global_step)
-                    # epochs_vs_performance['f1_score'].append(
-                    #     f1_score(y_true_val, y_pred_val))
+                    epochs_vs_performance['f1_score'].append(
+                        f1_score(y_true_val, y_pred_val))
                     print(y_true_val[:10])
                     print(y_pred_val[:10])
 
