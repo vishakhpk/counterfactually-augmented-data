@@ -20,7 +20,7 @@ models_to_plot = [
     # pretrain + clp
     'epochs=20,lambda=0.0005,lr=0.0005,vocab=3000,bsz=32,aug=0+model-imdb-pretrain',
     # pretrain + clp augmented
-    'epochs=20,lambda=0.0001,lr=0.0005,vocab=3000,bsz=32,aug=0+model-imdb-pretrain',
+    'epochs=20,lambda=0.0001,lr=0.0005,vocab=3000,bsz=32,aug=1+model-imdb-pretrain',
 ]
 
 # ROC curves
