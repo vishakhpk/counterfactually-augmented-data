@@ -8,7 +8,7 @@ models_to_plot = [
     # baseline augmented
     'epochs=20,lambda=0.0,lr=0.0005,vocab=3000,bsz=32,aug=1',
     # clp
-    'epochs=20,lambda=0.0005,lr=0.0005,vocab=3000,bsz=32,aug=1',
+    'epochs=20,lambda=0.0005,lr=0.0005,vocab=3000,bsz=32,aug=0',
     # clp augmented
     'epochs=20,lambda=0.0007,lr=0.0005,vocab=3000,bsz=32,aug=1',
     # pretrain
