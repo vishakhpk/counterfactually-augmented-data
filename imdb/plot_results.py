@@ -1,37 +1,46 @@
+import argparse
+
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from sklearn.metrics import roc_curve, roc_auc_score
+from sklearn.metrics import (roc_curve, roc_auc_score, accuracy_score, f1_score)
+
+parser = argparse.ArgumentParser(description='Hello.')
+parser.add_argument('--show', type=int, default=0)
+args = parser.parse_args()
+
+SHOW = args.show
 
 small_names = [
-    # baseline factual
-    'epochs=20,lambda=0.0,lr=0.0005,vocab=3000,bsz=32,aug=0',
-    # baseline augmented
-    'epochs=20,lambda=0.0,lr=0.0005,vocab=3000,bsz=32,aug=1',
-    # clp
-    'epochs=20,lambda=0.0005,lr=0.0005,vocab=3000,bsz=32,aug=1',
-    # clp augmented
-    'epochs=20,lambda=0.0007,lr=0.0005,vocab=3000,bsz=32,aug=1',
+    ('baseline factual',
+     'epochs=20,lambda=0.0,lr=0.0005,vocab=3000,bsz=32,aug=0'),
+    ('clp',
+     'epochs=20,lambda=0.0005,lr=0.0005,vocab=3000,bsz=32,aug=1'),
+    ('baseline augmented',
+     'epochs=20,lambda=0.0,lr=0.0005,vocab=3000,bsz=32,aug=1'),
+    ('clp augmented',
+     'epochs=20,lambda=0.0007,lr=0.0005,vocab=3000,bsz=32,aug=1'),
 ]
 
 large_names = [
-    # pretrain
-    'imdb-pretrain',
-    # pretrain + baseline factual
-    'epochs=20,lambda=0.0,lr=0.0005,vocab=3000,bsz=32,aug=0+model-imdb-pretrain',
-    # pretrain + baseline augmented
-    'epochs=20,lambda=0.0,lr=0.0005,vocab=3000,bsz=32,aug=1+model-imdb-pretrain',
-    # pretrain + clp
-    'epochs=20,lambda=0.0005,lr=0.0005,vocab=3000,bsz=32,aug=0+model-imdb-pretrain',
-    # pretrain + clp augmented
-    'epochs=20,lambda=0.0001,lr=0.0005,vocab=3000,bsz=32,aug=1+model-imdb-pretrain',
+    ('pretrain',
+     'imdb-pretrain'),
+    ('pretrain + baseline factual',
+     'epochs=20,lambda=0.0,lr=0.0005,vocab=3000,bsz=32,aug=0+model-imdb-pretrain'),
+    ('pretrain + baseline augmented',
+     'epochs=20,lambda=0.0,lr=0.0005,vocab=3000,bsz=32,aug=1+model-imdb-pretrain'),
+    ('pretrain + clp',
+     'epochs=20,lambda=0.0005,lr=0.0005,vocab=3000,bsz=32,aug=0+model-imdb-pretrain'),
+    ('pretrain + clp augmented',
+     'epochs=20,lambda=0.0001,lr=0.0005,vocab=3000,bsz=32,aug=1+model-imdb-pretrain'),
 ]
 
 for regime in [small_names, large_names]:
     # ROC curves
     plt.figure(figsize=(8, 8))
     plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
-    for model_name in regime:
-        df = pd.read_csv(f'results/{model_name}.csv')
+    for (model_name, params) in regime:
+        df = pd.read_csv(f'results/{params}.csv')
 
         y_true = df['y_true_fact']
         y_score = df['y_raw_fact']
@@ -109,4 +118,26 @@ plt.ylabel('F1 Score (Validation)')
 plt.title('Learning Curve by Lambda -- Small Regime\nCLP Augmented')
 plt.ylim(0.2, 1)
 
-plt.show()
+
+for regime in [small_names, large_names]:
+    for (model_name, params) in regime:
+        df = pd.read_csv(f'results/{params}.csv')
+        y_true_fact = df['y_true_fact']
+        y_score_fact = df['y_raw_fact']
+        y_score_cfact = df['y_raw_cfact']
+        y_pred_fact = df['y_pred_fact']
+        y_pred_cfact = df['y_pred_cfact']
+        print('-'*80)
+        print(model_name)
+        print(params)
+        print(f'AUC: {roc_auc_score(y_true_fact, y_pred_fact)}')
+        print(f'Accuracy: {accuracy_score(y_true_fact, y_pred_fact)}')
+        print(f'F1 Score: {f1_score(y_true_fact, y_pred_fact)}')
+        print(f'CF Consistency: {np.not_equal(y_pred_fact, y_pred_cfact).mean()}')
+        mean_difference = np.abs(np.subtract(y_score_fact, y_score_cfact)).mean()
+        print(f'CF Gap: {mean_difference}')
+        print('-'*80)
+
+
+if SHOW:
+    plt.show()

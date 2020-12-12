@@ -26,6 +26,8 @@ parser.add_argument('--vocab_size', type=int, default = 3000,
                     help='Vocab size for lstm')
 parser.add_argument('--output_path', type=str, default = "models",
                     help='Output path')
+parser.add_argument('--aug_test', type=int, default=1,
+                    help='Whether or not to cf-augment the test set (0 or 1)')
 args = parser.parse_args()
 
 EPOCHS = args.epochs
@@ -33,6 +35,7 @@ LR = args.lr
 OUT_DIR = args.output_path
 VOCAB_SIZE = args.vocab_size
 BSZ = args.batch_size
+AUG_TEST = args.aug_test
 
 random.seed(123)
 np.random.seed(123)
@@ -40,7 +43,7 @@ torch.manual_seed(123)
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-params = f'epochs={EPOCHS},lr={LR},vocab={VOCAB_SIZE},bsz={BSZ}'
+params = f'epochs={EPOCHS},lr={LR},vocab={VOCAB_SIZE},bsz={BSZ},aug_test={AUG_TEST}'
 print(f'params: {params}')
 model_name = f'imdb-pretrain'
 
@@ -55,7 +58,11 @@ X_val = val_df['text'].tolist()
 y_val = val_df['label'].tolist()
 
 # always use the same augmented test set
-test_df = pd.read_csv('data/aug_test.csv')
+if AUG_TEST:
+    test_path = 'data/aug_test.csv'
+else:
+    test_path = 'data/fact_test.csv'
+test_df = pd.read_csv(test_path)
 y_test = test_df['label'].tolist()
 
 print('Dataset size:')
