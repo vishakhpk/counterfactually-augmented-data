@@ -30,6 +30,8 @@ parser.add_argument('--output_path', type=str, default = "models",
                     help='Output path')
 parser.add_argument('--aug', type=int, default=1,
                     help='Whether or not to cf-augment the train/val sets (0 or 1)')
+parser.add_argument('--aug_test', type=int, default=1,
+                    help='Whether or not to cf-augment the test set (0 or 1)')
 parser.add_argument('--prepath', type=str, default=None,
                     help='Relative path *within models/* to pretrained model for warm starting')
 args = parser.parse_args()
@@ -42,9 +44,10 @@ VOCAB_SIZE = args.vocab_size
 BSZ = args.batch_size
 AUGMENTED = args.aug
 PRETRAIN_PATH = args.prepath
+AUG_TEST = args.aug_test
 
 model_name = f'epochs={EPOCHS},lambda={LAMBDA},lr={LR},vocab={VOCAB_SIZE},' \
-             f'bsz={BSZ},aug={AUGMENTED}'
+             f'bsz={BSZ},aug={AUGMENTED},aug_test={AUG_TEST}'
 
 random.seed(123)
 np.random.seed(123)
@@ -78,7 +81,7 @@ def load_imdb(split, augmented, random_state=123):
 
 train_df = load_imdb(split='train', augmented=AUGMENTED)
 val_df = load_imdb(split='val', augmented=AUGMENTED)
-test_df = load_imdb(split='test', augmented=False)  # test data always augmented
+test_df = load_imdb(split='test', augmented=AUG_TEST)
 
 print('Dataset size:')
 print(f'{len(train_df)} train, {len(val_df)} val, {len(test_df)} test')
