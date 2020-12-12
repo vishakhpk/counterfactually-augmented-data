@@ -78,7 +78,7 @@ def main():
         }
 
     for params in small_param_sets['clp_augmented']:
-        command = large_regime(**params)
+        command = small_regime(**params)
         run_command(command)
 
 
