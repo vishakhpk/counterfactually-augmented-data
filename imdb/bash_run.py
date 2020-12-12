@@ -23,8 +23,9 @@ def large_regime(lambda_coeff, epochs, lr, batch_size, aug, vocab_size):
 
 
 def run_command(bash_command):
-    process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE)
-    output, error = process.communicate()
+    # process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE)
+    # output, error = process.communicate()
+    subprocess.run(bash_command)
 
 
 def main():
