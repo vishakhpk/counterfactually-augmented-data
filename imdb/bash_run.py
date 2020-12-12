@@ -2,23 +2,23 @@ import subprocess
 
 
 def pre_train(lambda_coeff, epochs, lr, batch_size, aug, vocab_size):
-    command = f'python train_full_imdb.py --lambda_coff={lambda_coeff} ' \
+    command = f'python train_full_imdb.py --lambda_coeff={lambda_coeff} ' \
               f'--epochs={epochs} --lr={lr} --bsz={batch_size} --aug={aug} ' \
               f'--vocab={vocab_size}'
     return command
 
 
 def small_regime(lambda_coeff, epochs, lr, batch_size, aug, vocab_size):
-    command = f'python train_full_imdb.py --lambda_coff={lambda_coeff} ' \
+    command = f'python train_full_imdb.py --lambda_coeff={lambda_coeff} ' \
               f'--epochs={epochs} --lr={lr} --bsz={batch_size} --aug={aug} ' \
               f'--vocab={vocab_size}'
     return command
 
 
 def large_regime(lambda_coeff, epochs, lr, batch_size, aug, vocab_size):
-    command = f'python train_full_imdb.py --lambda_coff={lambda_coeff} ' \
+    command = f'python train_full_imdb.py --lambda_coeff={lambda_coeff} ' \
               f'--epochs={epochs} --lr={lr} --bsz={batch_size} --aug={aug} ' \
-              f"--vocab={vocab_size} --prepath='imdb-pretrain'"
+              f"--vocab={vocab_size} --prepath='imdb-pretrain.pt'"
     return command
 
 
