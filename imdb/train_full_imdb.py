@@ -26,8 +26,6 @@ parser.add_argument('--vocab_size', type=int, default = 3000,
                     help='Vocab size for lstm')
 parser.add_argument('--output_path', type=str, default = "models",
                     help='Output path')
-parser.add_argument('--aug', type=int, default=1,
-                    help='Whether or not to cf-augment the train/val sets (0 or 1)')
 args = parser.parse_args()
 
 EPOCHS = args.epochs
@@ -35,7 +33,6 @@ LR = args.lr
 OUT_DIR = args.output_path
 VOCAB_SIZE = args.vocab_size
 BSZ = args.batch_size
-AUGMENTED = args.aug
 
 random.seed(123)
 np.random.seed(123)
@@ -43,16 +40,12 @@ torch.manual_seed(123)
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-params = f'epochs={EPOCHS},lr={LR},vocab={VOCAB_SIZE},bsz={BSZ},aug={AUGMENTED}'
+params = f'epochs={EPOCHS},lr={LR},vocab={VOCAB_SIZE},bsz={BSZ}'
 print(f'params: {params}')
-model_name = f'imdb-pretrain-aug={AUGMENTED}'
+model_name = f'imdb-pretrain'
 
 # load full dataset
-if AUGMENTED:
-    path = 'data/aug_full_imdb_{}.csv'
-else:
-    path = 'data/fact_full_imdb_{}.csv'
-
+path = 'data/full_imdb_{}.csv'
 train_df = pd.read_csv(path.format('train'))
 X_train = train_df['text'].tolist()
 y_train = train_df['label'].tolist()
@@ -67,7 +60,6 @@ y_test = test_df['label'].tolist()
 
 print('Dataset size:')
 print(f'{len(y_train)} train, {len(y_val)} val, {len(test_df)} test')
-
 
 # setup tokenizer
 tokenizer = Tokenizer(num_words=VOCAB_SIZE, oov_token=True)
