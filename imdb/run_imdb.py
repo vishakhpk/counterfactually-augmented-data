@@ -11,7 +11,7 @@ from keras.preprocessing.text import Tokenizer
 from sklearn.model_selection import train_test_split
 from keras.preprocessing.sequence import pad_sequences
 from sklearn.metrics import (accuracy_score, classification_report,
-                             confusion_matrix)
+                             confusion_matrix, f1_score)
 
 from simple_lstm import LSTM
 from simple_lstm import (save_metrics, load_metrics, save_checkpoint,
@@ -165,6 +165,11 @@ def clp_loss(criterion, output, labels, cf_output, lambda_coef):
     loss = criterion(sigmoid_out, labels) - lambda_coef * counterfactual_loss
     return loss
 
+epochs_vs_performance = {
+    'epoch': [],
+    'step': [],
+    'f1_score': [],
+}
 
 def train(model,
           optimizer,
@@ -219,6 +224,11 @@ def train(model,
 
                         output = model(text, text_len)
                         output = torch.sigmoid(output)
+
+                        epochs_vs_performance['epoch'].append(epoch)
+                        epochs_vs_performance['step'].append(global_step)
+                        epochs_vs_performance['f1_score'].append(
+                            f1_score(labels, output))
 
                         loss = criterion(output, labels)
                         valid_running_loss += loss.item()
@@ -340,3 +350,6 @@ optimizer = optim.Adam(best_model.parameters(), lr=LR)
 load_checkpoint(destination_folder + f'/model-{model_name}.pt', best_model,
                 optimizer)
 evaluate(best_model, cf_test_loader)
+
+pd.DataFrame(epochs_vs_performance).to_csv(f'results/f1-{model_name}.csv',
+                                           index=False)
