@@ -67,7 +67,7 @@ def main():
 
     # sweep same parameters in small and large regime
     for experiment in param_sets.keys():
-        for params in experiment:
+        for params in param_sets[experiment]:
             command = small_regime(**params)
             run_command(command)
 
