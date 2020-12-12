@@ -8,14 +8,14 @@ def pre_train(lambda_coeff, epochs, lr, batch_size, aug, vocab_size):
 
 
 def small_regime(lambda_coeff, epochs, lr, batch_size, aug, vocab_size):
-    command = f'python train_full_imdb.py --lambda_coeff={lambda_coeff} ' \
+    command = f'python run_imdb.py --lambda_coeff={lambda_coeff} ' \
               f'--epochs={epochs} --lr={lr} --batch_size={batch_size} ' \
               f'--aug={aug} --vocab_size={vocab_size}'
     return command
 
 
 def large_regime(lambda_coeff, epochs, lr, batch_size, aug, vocab_size):
-    command = f'python train_full_imdb.py --lambda_coeff={lambda_coeff} ' \
+    command = f'python run_imdb.py --lambda_coeff={lambda_coeff} ' \
               f'--epochs={epochs} --lr={lr} --batch_size={batch_size} ' \
               f'--aug={aug} --vocab_size={vocab_size} ' \
               f"--prepath='imdb-pretrain.pt'"
