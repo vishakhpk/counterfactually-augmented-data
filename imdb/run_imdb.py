@@ -78,7 +78,7 @@ def load_imdb(split, augmented, random_state=123):
 
 train_df = load_imdb(split='train', augmented=AUGMENTED)
 val_df = load_imdb(split='val', augmented=AUGMENTED)
-test_df = load_imdb(split='test', augmented=True)  # test data always augmented
+test_df = load_imdb(split='test', augmented=False)  # test data always augmented
 
 print('Dataset size:')
 print(f'{len(train_df)} train, {len(val_df)} val, {len(test_df)} test')
