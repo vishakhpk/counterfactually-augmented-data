@@ -8,10 +8,12 @@ from sklearn.metrics import (roc_curve, roc_auc_score, accuracy_score, f1_score)
 parser = argparse.ArgumentParser(description='Hello.')
 parser.add_argument('--show', type=int, default=0)
 parser.add_argument('--save', type=int, default=0)
+parser.add_argument('--window', type=int, default=5)
 args = parser.parse_args()
 
 SHOW = args.show
 SAVE = args.save
+WINDOW = args.window
 
 fig_num = 0
 
@@ -66,12 +68,13 @@ small_regime = [(key, name) for key, filenames in filename_strings.items()
                 for name in filenames]
 large_regime = [(key + 'Pretrain', name + '+model-imdb-pretrain')
                 for key, filenames in filename_strings.items()
-                for name in filenames]
+                for name in filenames] # + [('pretrain', 'imdb-pretrain')]
 
 regimes = [small_regime, large_regime]
 
 best_results = {key: (0, None) for key in filename_strings.keys()}
 best_results.update({key + 'Pretrain': (0, None) for key in filename_strings.keys()})
+best_results.update({'pretrain': 'imdb-pretrain'})
 
 latex_output = {key: [] for key in best_results.keys()}
 
@@ -167,79 +170,80 @@ for regime in regimes:
 
 # plt.show()
 
-plt.figure(figsize=(8, 6))
+plt.figure(figsize=(4, 6))
 lambda_names_aug = [name + '+model-imdb-pretrain'
-                    for name in filename_strings['clpAugmented'][::2]]
+                    for name in filename_strings['clpAugmented']]
 lambda_names = [name + '+model-imdb-pretrain'
-                for name in filename_strings['clp'][::2]]
+                for name in filename_strings['clp']]
 
 lambdas = ['1e-07', '1e-06', '1e-05', '1e-04', '1e-03', '1e-02', '0']
 for i, model_name in enumerate(lambda_names_aug):
     df = pd.read_csv(f'results/f1-{model_name}.csv')
 
-    f1_scores = df['f1_score'].rolling(window=5).median()
-    steps = list(range(len(f1_scores)))
-    plt.plot(steps, f1_scores, label=lambdas[i])
+    f1_scores = df['f1_score'].rolling(window=WINDOW).median()
+    steps = [step/2 for step in list(range(len(f1_scores)))]
+    plt.plot(steps[40:], f1_scores[40:], label=lambdas[i])
 plt.legend()
-plt.xlabel('Step')
-plt.ylabel('F1 Score (Validation)')
-plt.title('Learning Curve by Lambda -- Large Regime\nPretrain + CLP Augmented')
-plt.ylim(0.2, 1)
+# plt.xlabel('Epoch')
+# plt.yticks([])
+# plt.ylabel('F1 Score (Validation)')
+# plt.title('Learning Curve by Lambda -- Large Regime\nPretrain + CLP Augmented')
+plt.ylim(0.75, 0.9)
 
 if SAVE:
     fig_num += 1
-    plt.savefig(f'fig_{fig_num}.pdf')
+    plt.savefig(f'fig_{fig_num}_pretrain_clp_aug_zoom.pdf')
 
 plt.figure(figsize=(8, 6))
 for i, model_name in enumerate(lambda_names):
     df = pd.read_csv(f'results/f1-{model_name}.csv')
 
-    f1_scores = df['f1_score'].rolling(window=5).median()
-    steps = list(range(len(f1_scores)))
+    f1_scores = df['f1_score'].rolling(window=WINDOW).median()
+    steps = [step/2 for step in list(range(len(f1_scores)))]
     plt.plot(steps, f1_scores, label=lambdas[i])
 plt.legend()
-plt.xlabel('Step')
+plt.xlabel('Epoch')
 plt.ylabel('F1 Score (Validation)')
-plt.title('Learning Curve by Lambda -- Large Regime\nPretrain + CLP')
-plt.ylim(0.2, 1)
+# plt.title('Learning Curve by Lambda -- Large Regime\nPretrain + CLP')
+plt.ylim(0.5, 1)
 
 if SAVE:
     fig_num += 1
-    plt.savefig(f'fig_{fig_num}.pdf')
+    plt.savefig(f'fig_{fig_num}_pretrain_clp.pdf')
 
 # plt.show()
 
 plt.figure(figsize=(8, 6))
-lambda_names_aug = filename_strings['clpAugmented'][::2]
-lambda_names = filename_strings['clp'][::2]
+lambda_names_aug = filename_strings['clpAugmented']
+lambda_names = filename_strings['clp']
 lambdas = ['1e-07', '1e-06', '1e-05', '1e-04', '1e-03', '1e-02', '0']
 for i, model_name in enumerate(lambda_names_aug):
     df = pd.read_csv(f'results/f1-{model_name}.csv')
 
-    f1_scores = df['f1_score'].rolling(window=5).median()
-    steps = list(range(len(f1_scores)))
+    f1_scores = df['f1_score'].rolling(window=WINDOW).median()
+    steps = [step/2 for step in list(range(len(f1_scores)))]
     plt.plot(steps, f1_scores, label=lambdas[i])
 plt.legend()
-plt.xlabel('Step')
+plt.xlabel('Epoch')
 plt.ylabel('F1 Score (Validation)')
-plt.title('Learning Curve by Lambda -- Small Regime\nCLP Augmented')
+# plt.title('Learning Curve by Lambda -- Small Regime\nCLP Augmented')
 plt.ylim(0.2, 1)
 
 if SAVE:
     fig_num += 1
-    plt.savefig(f'fig_{fig_num}.pdf')
+    plt.savefig(f'fig_{fig_num}_clp_aug.pdf')
 
 plt.figure(figsize=(8, 6))
 for i, model_name in enumerate(lambda_names):
     df = pd.read_csv(f'results/f1-{model_name}.csv')
 
-    f1_scores = df['f1_score'].rolling(window=5).median()
-    steps = list(range(len(f1_scores)))
+    f1_scores = df['f1_score'].rolling(window=WINDOW).median()
+    steps = [step/2 for step in list(range(len(f1_scores)))]
     plt.plot(steps, f1_scores, label=lambdas[i])
 plt.legend()
-plt.xlabel('Step')
+plt.xlabel('Epoch')
 plt.ylabel('F1 Score (Validation)')
-plt.title('Learning Curve by Lambda -- Small Regime\nCLP')
+# plt.title('Learning Curve by Lambda -- Small Regime\nCLP')
 plt.ylim(0.2, 1)
 
 if SHOW:
@@ -247,4 +251,4 @@ if SHOW:
 
 if SAVE:
     fig_num += 1
-    plt.savefig(f'fig_{fig_num}.pdf')
+    plt.savefig(f'fig_{fig_num}_clp.pdf')
